@@ -368,7 +368,7 @@ nav {
 }
 
 .game-info {
-  padding: 20px 24px 24px;
+  padding: 20px 16px 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -432,8 +432,8 @@ nav {
 }
 
 .game-year {
-  font-family: var(--mono);
-  font-size: 13px;
+  font-family: var(--sans);
+  font-size: 15px;
   color: var(--muted);
 }
 
@@ -530,8 +530,8 @@ nav {
 }
 
 .timeline-period {
-  font-family: var(--mono);
-  font-size: 13px;
+  font-family: var(--sans);
+  font-size: 15px;
   color: var(--muted);
   letter-spacing: 1px;
   display: block;
@@ -542,7 +542,8 @@ nav {
   display: inline-block;
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 1.5px;
+  font-weight: 500;
+  letter-spacing: 1px;
   text-transform: uppercase;
   padding: 2px 8px;
   border-radius: 2px;
@@ -645,6 +646,7 @@ nav {
 .timeline-role {
   font-size: 24px;
   font-weight: 700;
+  line-height: 1.1;
   color: var(--text);
   margin-bottom: 4px;
   transition: color 0.25s;
