@@ -9,12 +9,103 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// Game card → scroll to matching experience entry
+// Buzzing letter-by-letter reveal helpers
+function prepareReveal(body) {
+  if (body.querySelector('.char-buzz')) return;
+  body._revealTimeouts = [];
+
+  body.querySelectorAll('.timeline-bullets li').forEach(li => li.classList.add('li-hidden'));
+  body.querySelectorAll('.shipped-section, .contributed-section').forEach(sec => sec.classList.add('section-hidden'));
+  body.querySelectorAll('.shipped-tag, .contributed-tag').forEach(tag => tag.classList.add('tag-hidden'));
+
+  const targets = body.querySelectorAll('.timeline-desc, .timeline-bullets li, .shipped-section-title, .shipped-tag, .contributed-section-title, .contributed-tag');
+  let delay = 0;
+  let prevWasBullet = false;
+
+  targets.forEach(target => {
+    const isSectionTitle = target.matches('.shipped-section-title, .contributed-section-title');
+
+    // Add gap after last bullet so its 200ms animation can finish before the section appears
+    if (isSectionTitle && prevWasBullet) delay += 200;
+    prevWasBullet = target.matches('.timeline-bullets li');
+
+    const startDelay = delay;
+
+    if (target.matches('.timeline-bullets li')) {
+      body._revealTimeouts.push(setTimeout(() => target.classList.remove('li-hidden'), startDelay));
+    } else if (target.matches('.shipped-section-title')) {
+      const sec = target.closest('.shipped-section');
+      body._revealTimeouts.push(setTimeout(() => sec && sec.classList.remove('section-hidden'), startDelay));
+    } else if (target.matches('.contributed-section-title')) {
+      const sec = target.closest('.contributed-section');
+      body._revealTimeouts.push(setTimeout(() => sec && sec.classList.remove('section-hidden'), startDelay));
+    } else if (target.matches('.shipped-tag, .contributed-tag')) {
+      body._revealTimeouts.push(setTimeout(() => target.classList.remove('tag-hidden'), startDelay));
+    }
+
+    const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(textNode => {
+      const frag = document.createDocumentFragment();
+      for (const char of textNode.textContent) {
+        const s = document.createElement('span');
+        s.className = 'char-buzz';
+        s.textContent = char;
+        s.style.animationDelay = delay + 'ms';
+        delay += 5;
+        frag.appendChild(s);
+      }
+      textNode.parentNode.replaceChild(frag, textNode);
+    });
+  });
+}
+
+function cleanupReveal(body) {
+  (body._revealTimeouts || []).forEach(clearTimeout);
+  body._revealTimeouts = [];
+  body.querySelectorAll('.li-hidden').forEach(el => el.classList.remove('li-hidden'));
+  body.querySelectorAll('.section-hidden').forEach(el => el.classList.remove('section-hidden'));
+  body.querySelectorAll('.tag-hidden').forEach(el => el.classList.remove('tag-hidden'));
+  body.querySelectorAll('.char-buzz').forEach(span => {
+    span.replaceWith(document.createTextNode(span.textContent));
+  });
+}
+
+// Experience collapse/expand
+const timelineItems = document.querySelectorAll('.timeline-item');
+
+timelineItems.forEach(item => {
+  const body = item.querySelector('.timeline-body');
+
+  function toggle() {
+    const wasOpen = item.classList.contains('open');
+    if (!wasOpen && body) prepareReveal(body);
+    else if (wasOpen && body) cleanupReveal(body);
+    item.classList.toggle('open');
+  }
+
+  const header = item.querySelector('.timeline-header');
+  if (header) {
+    header.addEventListener('click', e => {
+      if (e.target.closest('a')) return;
+      toggle();
+    });
+  }
+});
+
+// Game card → expand matching experience and scroll to it
 document.querySelectorAll('.game-card[data-exp]').forEach(card => {
   card.addEventListener('click', () => {
     const target = document.querySelector(card.dataset.exp);
     if (!target) return;
     target.classList.add('visible');
+    if (!target.classList.contains('open')) {
+      const body = target.querySelector('.timeline-body');
+      if (body) prepareReveal(body);
+      target.classList.add('open');
+    }
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const title = target.querySelector('.timeline-role');
     if (!title) return;
