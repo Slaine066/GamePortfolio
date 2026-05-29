@@ -54,12 +54,17 @@ function prepareReveal(body) {
         s.className = 'char-buzz';
         s.textContent = char;
         s.style.animationDelay = delay + 'ms';
+        s.addEventListener('animationend', () => {
+          s.style.animation = 'none';
+          s.style.opacity  = '1';
+        }, { once: true });
         delay += 5;
         frag.appendChild(s);
       }
       textNode.parentNode.replaceChild(frag, textNode);
     });
   });
+
 }
 
 function cleanupReveal(body) {
