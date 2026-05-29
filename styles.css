@@ -950,6 +950,8 @@ footer {
   .hero-scroll { left: 50%; transform: translateX(-50%); }
   .section-title { font-size: 38px; }
   .hero-inner { flex-direction: column; gap: 40px; align-items: flex-start; }
+  .timeline-header,
+  .timeline-item.open .timeline-header { width: 100%; transition: none; }
 }
 
 @media (max-width: 600px) {
