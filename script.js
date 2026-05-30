@@ -49,17 +49,34 @@ function prepareReveal(body) {
     while ((n = walker.nextNode())) nodes.push(n);
     nodes.forEach(textNode => {
       const frag = document.createDocumentFragment();
-      for (const char of textNode.textContent) {
-        const s = document.createElement('span');
-        s.className = 'char-buzz';
-        s.textContent = char;
-        s.style.animationDelay = delay + 'ms';
-        s.addEventListener('animationend', () => {
-          s.style.animation = 'none';
-          s.style.opacity  = '1';
-        }, { once: true });
-        delay += 5;
-        frag.appendChild(s);
+      const text = textNode.textContent;
+      let i = 0;
+      while (i < text.length) {
+        const isSpace = /\s/.test(text[i]);
+        let j = i;
+        while (j < text.length && /\s/.test(text[j]) === isSpace) j++;
+        const token = text.slice(i, j);
+        if (isSpace) {
+          frag.appendChild(document.createTextNode(token));
+          delay += 5 * token.length;
+        } else {
+          const wordSpan = document.createElement('span');
+          wordSpan.className = 'char-word';
+          for (const char of token) {
+            const s = document.createElement('span');
+            s.className = 'char-buzz';
+            s.textContent = char;
+            s.style.animationDelay = delay + 'ms';
+            s.addEventListener('animationend', () => {
+              s.style.animation = 'none';
+              s.style.opacity  = '1';
+            }, { once: true });
+            delay += 5;
+            wordSpan.appendChild(s);
+          }
+          frag.appendChild(wordSpan);
+        }
+        i = j;
       }
       textNode.parentNode.replaceChild(frag, textNode);
     });
@@ -74,6 +91,9 @@ function cleanupReveal(body) {
   body.querySelectorAll('.section-hidden').forEach(el => el.classList.remove('section-hidden'));
   body.querySelectorAll('.tag-hidden').forEach(el => el.classList.remove('tag-hidden'));
   body.querySelectorAll('.char-buzz').forEach(span => {
+    span.replaceWith(document.createTextNode(span.textContent));
+  });
+  body.querySelectorAll('.char-word').forEach(span => {
     span.replaceWith(document.createTextNode(span.textContent));
   });
 }

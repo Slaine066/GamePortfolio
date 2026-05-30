@@ -626,6 +626,11 @@ nav {
   100% { opacity: 1; text-shadow: none;                                                                            filter: none;            transform: none; }
 }
 
+.char-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 .char-buzz {
   display: inline-block;
   white-space: pre;
